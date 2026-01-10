@@ -62,5 +62,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>25</maven.compiler.release>
         <exec.mainClass>se.trixon.quakeml4j.Quakeml4j</exec.mainClass>
+        <netbeans.hint.license>apache20</netbeans.hint.license>
     </properties>
 </project>

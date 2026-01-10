@@ -1,13 +1,26 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Copyright 2026 Patrik Karlström <patrik@trixon.se>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package se.trixon.quakeml4j.demo;
 
-import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
-import se.trixon.quakeml4j.QuakeManager;
-import se.trixon.quakeml4j.v1_2.Event;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
+import se.trixon.quakeml4j.QuakeParser;
 
 /**
  *
@@ -15,35 +28,29 @@ import se.trixon.quakeml4j.v1_2.Event;
  */
 public class DemoQuakeml4j {
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Hello QuakeML!");
+    public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+        System.out.println("DemoQuakeml4j");
         var f = new File("src/main/resources/001.xml");
-        System.out.println(f);
-        System.out.println(f.isFile());
-        var qm = new QuakeManager();
-        try {
-            var quakeml = qm.read(f);
+//        f = new File("src/main/resources/qml-example-1.2-RC5.xml");
 
-            if (quakeml.getEventParameters() != null) {
-                for (var o : quakeml.getEventParameters().getCommentOrEventOrDescription()) {
-                    if (o instanceof Event event) {
-                        System.out.println(event);
-//                        System.out.println(event.);
-                    }
-                    System.out.println(o);
-                    System.out.println(o.getClass());
-                }
-            }
-
-//            System.out.println(quakeml);
-//            System.out.println(quakeml.getEventParameters().getAny().size());
-//            System.out.println(quakeml.getEventParameters().getAny().getClass());
-//            System.out.println(quakeml.getEventParameters());
-//            System.out.println(quakeml.getEventParameters().getPublicID());
-//        Files.list(Path.of()).forEach(p -> {
-//        });
-        } catch (JAXBException ex) {
-            System.getLogger(DemoQuakeml4j.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        var parser = new QuakeParser();
+        for (var quake : parser.parse(f)) {
+            System.out.println("");
+            System.out.println(quake.getPublicId());
+            System.out.println(quake.getType());
+            System.out.println(quake.getTypeCertainty());
+            System.out.println(quake.getCreationInfo());
+            System.out.println(quake.getCreationInfo().getAgencyId());
+            System.out.println(quake.getCreationInfo().getAuthor());
+            System.out.println(quake.getCreationInfo().getCreationTime());
+            System.out.println(quake.getOrigin().getTime());
+            System.out.println(quake.getOrigin().getLatitude());
+            System.out.println(quake.getOrigin().getLongitude());
+            System.out.println(quake.getOrigin().getDepth());
+            System.out.println(quake.getOrigin().getDepthType());
+            System.out.println(quake.getOrigin().getType());
+            System.out.println(quake.getMagnitude());
+            System.out.println(quake.getMagnitudeType());
         }
     }
 }
