@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2026 Patrik Karlström <patrik@trixon.se>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,17 +44,17 @@ public class QuakeParser {
     private XPathExpression mCreationInfoAuthorExpression;
     private XPathExpression mCreationInfoCreationTimeExpression;
     private DocumentBuilderFactory mDocumentBuilderFactory;
+    private XPathExpression mOriginDepthExpression;
+    private XPathExpression mOriginDepthTypeExpression;
     private XPathExpression mOriginLatExpression;
     private XPathExpression mOriginLonExpression;
     private XPathExpression mOriginTimeExpression;
-    private XPathExpression mOriginDepthExpression;
-    private XPathExpression mOriginDepthTypeExpression;
     private XPathExpression mOriginTypeExpression;
+    private XPathExpression mRootMagnitudeExpression;
+    private XPathExpression mRootMagnitudeTypeExpression;
     private XPathExpression mRootPublicIdExpression;
     private XPathExpression mRootTypeCertaintyExpression;
     private XPathExpression mRootTypeExpression;
-    private XPathExpression mRootMagnitudeExpression;
-    private XPathExpression mRootMagnitudeTypeExpression;
     private XPath mxPath;
 
     public QuakeParser() {

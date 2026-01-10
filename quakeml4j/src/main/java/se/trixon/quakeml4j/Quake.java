@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2026 Patrik Karlström <patrik@trixon.se>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +21,13 @@ package se.trixon.quakeml4j;
  */
 public class Quake {
 
-    private String mPublicId;
+    private CreationInfo mCreationInfo = new CreationInfo();
     private Double mMagnitude;
     private String mMagnitudeType;
+    private Origin mOrigin = new Origin();
+    private String mPublicId;
     private Type mType;
     private TypeCertainty mTypeCertainty;
-    private CreationInfo mCreationInfo = new CreationInfo();
-    private Origin mOrigin = new Origin();
 
     public Quake() {
     }
@@ -61,31 +61,31 @@ public class Quake {
     }
 
     public void setCreationInfo(CreationInfo creationInfo) {
-        this.mCreationInfo = creationInfo;
+        mCreationInfo = creationInfo;
     }
 
     public void setMagnitude(Double magnitude) {
-        this.mMagnitude = magnitude;
+        mMagnitude = magnitude;
     }
 
     public void setMagnitudeType(String magnitudeType) {
-        this.mMagnitudeType = magnitudeType;
+        mMagnitudeType = magnitudeType;
     }
 
     public void setOrigin(Origin origin) {
-        this.mOrigin = origin;
+        mOrigin = origin;
     }
 
     public void setPublicId(String publicId) {
-        this.mPublicId = publicId;
+        mPublicId = publicId;
     }
 
     public void setType(Type type) {
-        this.mType = type;
+        mType = type;
     }
 
     public void setTypeCertainty(TypeCertainty typeCertainty) {
-        this.mTypeCertainty = typeCertainty;
+        mTypeCertainty = typeCertainty;
     }
 
     public enum Type {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2026 Patrik Karlström <patrik@trixon.se>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,11 +23,11 @@ import java.time.OffsetDateTime;
  */
 public class Origin {
 
-    private OffsetDateTime mTime;
-    private Double mLatitude;
     private Double mDepth;
-    private Double mLongitude;
     private DepthType mDepthType;
+    private Double mLatitude;
+    private Double mLongitude;
+    private OffsetDateTime mTime;
     private Type mType;
 
     public Origin() {
@@ -58,27 +58,27 @@ public class Origin {
     }
 
     public void setDepth(Double depth) {
-        this.mDepth = depth;
+        mDepth = depth;
     }
 
     public void setDepthType(DepthType depthType) {
-        this.mDepthType = depthType;
+        mDepthType = depthType;
     }
 
     public void setLatitude(Double latitude) {
-        this.mLatitude = latitude;
+        mLatitude = latitude;
     }
 
     public void setLongitude(Double longitude) {
-        this.mLongitude = longitude;
+        mLongitude = longitude;
     }
 
     public void setTime(OffsetDateTime time) {
-        this.mTime = time;
+        mTime = time;
     }
 
     public void setType(Type type) {
-        this.mType = type;
+        mType = type;
     }
 
     public enum DepthType {

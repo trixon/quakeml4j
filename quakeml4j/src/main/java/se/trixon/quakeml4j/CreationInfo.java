@@ -43,15 +43,15 @@ public class CreationInfo {
     }
 
     public void setAgencyId(String agencyId) {
-        this.mAgencyId = agencyId;
+        mAgencyId = agencyId;
     }
 
     public void setAuthor(String author) {
-        this.mAuthor = author;
+        mAuthor = author;
     }
 
     public void setCreationTime(OffsetDateTime creationTime) {
-        this.mCreationTime = creationTime;
+        mCreationTime = creationTime;
     }
 
 }
