@@ -49,16 +49,19 @@ public class QuakeParser {
     private XPathExpression mCreationInfoAgencyIdExpression;
     private XPathExpression mCreationInfoAuthorExpression;
     private XPathExpression mCreationInfoCreationTimeExpression;
+    private XPathExpression mCreationInfoExpression;
     private DocumentBuilderFactory mDocumentBuilderFactory;
     private XPathExpression mEventListExpression;
+    private XPathExpression mMagnitudeExpression;
+    private XPathExpression mMagnitudeTypeExpression;
+    private XPathExpression mMagnitudeValueExpression;
     private XPathExpression mOriginDepthExpression;
     private XPathExpression mOriginDepthTypeExpression;
+    private XPathExpression mOriginExpression;
     private XPathExpression mOriginLatExpression;
     private XPathExpression mOriginLonExpression;
     private XPathExpression mOriginTimeExpression;
     private XPathExpression mOriginTypeExpression;
-    private XPathExpression mRootMagnitudeExpression;
-    private XPathExpression mRootMagnitudeTypeExpression;
     private XPathExpression mRootPublicIdExpression;
     private XPathExpression mRootTypeCertaintyExpression;
     private XPathExpression mRootTypeExpression;
@@ -75,19 +78,23 @@ public class QuakeParser {
             mRootPublicIdExpression = mxPath.compile("@publicID");
             mRootTypeExpression = mxPath.compile("bed:type");
             mRootTypeCertaintyExpression = mxPath.compile("bed:typeCertainty");
-            mRootMagnitudeExpression = mxPath.compile("bed:magnitude/bed:mag/bed:value");
-            mRootMagnitudeTypeExpression = mxPath.compile("bed:magnitude/bed:type");
             //
-            mCreationInfoAgencyIdExpression = mxPath.compile("bed:creationInfo/bed:agencyID");
-            mCreationInfoAuthorExpression = mxPath.compile("bed:creationInfo/bed:author");
-            mCreationInfoCreationTimeExpression = mxPath.compile("bed:creationInfo/bed:creationTime");
+            mMagnitudeExpression = mxPath.compile("bed:magnitude");
+            mMagnitudeValueExpression = mxPath.compile("bed:mag/bed:value");
+            mMagnitudeTypeExpression = mxPath.compile("bed:type");
             //
-            mOriginTimeExpression = mxPath.compile("bed:origin/bed:time/bed:value");
-            mOriginLatExpression = mxPath.compile("bed:origin/bed:latitude/bed:value");
-            mOriginLonExpression = mxPath.compile("bed:origin/bed:longitude/bed:value");
-            mOriginDepthExpression = mxPath.compile("bed:origin/bed:depth/bed:value");
-            mOriginDepthTypeExpression = mxPath.compile("bed:origin/bed:depthType");
-            mOriginTypeExpression = mxPath.compile("bed:origin/bed:type");
+            mCreationInfoExpression = mxPath.compile("bed:creationInfo");
+            mCreationInfoAgencyIdExpression = mxPath.compile("bed:agencyID");
+            mCreationInfoAuthorExpression = mxPath.compile("bed:author");
+            mCreationInfoCreationTimeExpression = mxPath.compile("bed:creationTime");
+            //
+            mOriginExpression = mxPath.compile("bed:origin");
+            mOriginTimeExpression = mxPath.compile("bed:time/bed:value");
+            mOriginLatExpression = mxPath.compile("bed:latitude/bed:value");
+            mOriginLonExpression = mxPath.compile("bed:longitude/bed:value");
+            mOriginDepthExpression = mxPath.compile("bed:depth/bed:value");
+            mOriginDepthTypeExpression = mxPath.compile("bed:depthType");
+            mOriginTypeExpression = mxPath.compile("bed:type");
         } catch (XPathExpressionException ex) {
             System.getLogger(QuakeParser.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
         }
@@ -95,28 +102,38 @@ public class QuakeParser {
 
     public List<Quake> parse(File file) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         var doc = mDocumentBuilderFactory.newDocumentBuilder().parse(file);
-
         var quakes = new ArrayList<Quake>();
         var eventNodes = (NodeList) mEventListExpression.evaluate(doc, XPathConstants.NODESET);
+
         for (int i = 0; i < eventNodes.getLength(); i++) {
             var eventNode = eventNodes.item(i);
             var q = new Quake();
             q.setPublicId(mRootPublicIdExpression.evaluate(eventNode));
             q.setType(Quake.Type.fromValue(mRootTypeExpression.evaluate(eventNode)));
             q.setTypeCertainty(Quake.TypeCertainty.fromValue(mRootTypeCertaintyExpression.evaluate(eventNode)));
-            q.setMagnitude(getAsDouble(eventNode, mRootMagnitudeExpression));
-            q.setMagnitudeType(mRootMagnitudeTypeExpression.evaluate(eventNode));
 //
-            q.getCreationInfo().setAgencyId(mCreationInfoAgencyIdExpression.evaluate(eventNode));
-            q.getCreationInfo().setAuthor(mCreationInfoAuthorExpression.evaluate(eventNode));
-            q.getCreationInfo().setCreationTime(OffsetDateTime.parse(mCreationInfoCreationTimeExpression.evaluate(eventNode)));
+            var magnitudeNode = (Node) mMagnitudeExpression.evaluate(eventNode, XPathConstants.NODE);
+            if (magnitudeNode != null) {
+                q.getMagnitude().setValue((Double) mMagnitudeValueExpression.evaluate(magnitudeNode, XPathConstants.NUMBER));
+                q.getMagnitude().setType(mMagnitudeTypeExpression.evaluate(magnitudeNode));
+            }
 //
-            q.getOrigin().setTime(OffsetDateTime.parse(mOriginTimeExpression.evaluate(eventNode)));
-            q.getOrigin().setLatitude(getAsDouble(eventNode, mOriginLatExpression));
-            q.getOrigin().setLongitude(getAsDouble(eventNode, mOriginLonExpression));
-            q.getOrigin().setDepth(getAsDouble(eventNode, mOriginDepthExpression));
-            q.getOrigin().setDepthType(Origin.DepthType.fromValue(mOriginDepthTypeExpression.evaluate(eventNode)));
-            q.getOrigin().setType(Origin.Type.fromValue(mOriginTypeExpression.evaluate(eventNode)));
+            var creationInfoNode = (Node) mCreationInfoExpression.evaluate(eventNode, XPathConstants.NODE);
+            if (creationInfoNode != null) {
+                q.getCreationInfo().setAgencyId(mCreationInfoAgencyIdExpression.evaluate(creationInfoNode));
+                q.getCreationInfo().setAuthor(mCreationInfoAuthorExpression.evaluate(creationInfoNode));
+                q.getCreationInfo().setCreationTime(OffsetDateTime.parse(mCreationInfoCreationTimeExpression.evaluate(creationInfoNode)));
+            }
+//
+            var originNode = (Node) mOriginExpression.evaluate(eventNode, XPathConstants.NODE);
+            if (originNode != null) {
+                q.getOrigin().setTime(OffsetDateTime.parse(mOriginTimeExpression.evaluate(originNode)));
+                q.getOrigin().setLatitude((Double) mOriginLatExpression.evaluate(originNode, XPathConstants.NUMBER));
+                q.getOrigin().setLongitude((Double) mOriginLonExpression.evaluate(originNode, XPathConstants.NUMBER));
+                q.getOrigin().setDepth((Double) mOriginDepthExpression.evaluate(originNode, XPathConstants.NUMBER));
+                q.getOrigin().setDepthType(Origin.DepthType.fromValue(mOriginDepthTypeExpression.evaluate(originNode)));
+                q.getOrigin().setType(Origin.Type.fromValue(mOriginTypeExpression.evaluate(originNode)));
+            }
 //
             quakes.add(q);
         }
@@ -163,20 +180,6 @@ public class QuakeParser {
         }
 
         return quakes;
-    }
-
-    private Double getAsDouble(Node node, XPathExpression expression) throws XPathExpressionException {
-        var s = expression.evaluate(node);
-        if (!s.isEmpty()) {
-            try {
-                return Double.valueOf(s);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        } else {
-            return null;
-        }
-
     }
 
     public class QuakeNamespaceContext implements NamespaceContext {

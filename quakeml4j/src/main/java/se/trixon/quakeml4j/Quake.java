@@ -22,8 +22,7 @@ package se.trixon.quakeml4j;
 public class Quake {
 
     private CreationInfo mCreationInfo = new CreationInfo();
-    private Double mMagnitude;
-    private String mMagnitudeType;
+    private Magnitude mMagnitude = new Magnitude();
     private Origin mOrigin = new Origin();
     private String mPlace;
     private String mPublicId;
@@ -37,12 +36,8 @@ public class Quake {
         return mCreationInfo;
     }
 
-    public Double getMagnitude() {
+    public Magnitude getMagnitude() {
         return mMagnitude;
-    }
-
-    public String getMagnitudeType() {
-        return mMagnitudeType;
     }
 
     public Origin getOrigin() {
@@ -69,12 +64,8 @@ public class Quake {
         mCreationInfo = creationInfo;
     }
 
-    public void setMagnitude(Double magnitude) {
+    public void setMagnitude(Magnitude magnitude) {
         mMagnitude = magnitude;
-    }
-
-    public void setMagnitudeType(String magnitudeType) {
-        mMagnitudeType = magnitudeType;
     }
 
     public void setOrigin(Origin origin) {
