@@ -17,10 +17,16 @@ package se.trixon.quakeml4j;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,6 +50,7 @@ public class QuakeParser {
     private XPathExpression mCreationInfoAuthorExpression;
     private XPathExpression mCreationInfoCreationTimeExpression;
     private DocumentBuilderFactory mDocumentBuilderFactory;
+    private XPathExpression mEventListExpression;
     private XPathExpression mOriginDepthExpression;
     private XPathExpression mOriginDepthTypeExpression;
     private XPathExpression mOriginLatExpression;
@@ -64,6 +71,7 @@ public class QuakeParser {
         mxPath.setNamespaceContext(new QuakeNamespaceContext());
 
         try {
+            mEventListExpression = mxPath.compile("//bed:event");
             mRootPublicIdExpression = mxPath.compile("@publicID");
             mRootTypeExpression = mxPath.compile("bed:type");
             mRootTypeCertaintyExpression = mxPath.compile("bed:typeCertainty");
@@ -88,9 +96,8 @@ public class QuakeParser {
     public List<Quake> parse(File file) throws XPathExpressionException, ParserConfigurationException, SAXException, IOException {
         var doc = mDocumentBuilderFactory.newDocumentBuilder().parse(file);
 
-        List<Quake> quakes = new ArrayList<>();
-
-        var eventNodes = (NodeList) mxPath.evaluate("//bed:event", doc, XPathConstants.NODESET);
+        var quakes = new ArrayList<Quake>();
+        var eventNodes = (NodeList) mEventListExpression.evaluate(doc, XPathConstants.NODESET);
         for (int i = 0; i < eventNodes.getLength(); i++) {
             var eventNode = eventNodes.item(i);
             var q = new Quake();
@@ -113,6 +120,48 @@ public class QuakeParser {
 //
             quakes.add(q);
         }
+
+        return quakes;
+    }
+
+    public ConcurrentLinkedQueue<Quake> parseRecursive(File dir) {
+        var quakes = new ConcurrentLinkedQueue<Quake>();
+        var existingIds = ConcurrentHashMap.newKeySet();
+        var semaphore = new Semaphore(Runtime.getRuntime().availableProcessors() * 2);
+
+        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            try (var paths = Files.walk(Paths.get(dir.toURI()))) {
+                paths.filter(Files::isRegularFile)
+                        .map(path -> path.toFile())
+                        .filter(file -> file.getName().endsWith(".xml") && file.length() > 0)
+                        .forEach(file -> {
+                            executor.submit(() -> {
+                                try {
+                                    semaphore.acquire();
+                                    var earthquakeFileItems = parse(file).stream()
+                                            .filter(quake -> {
+                                                if (existingIds.contains(quake.getPublicId())) {
+                                                    return false;
+                                                } else {
+                                                    existingIds.add(quake.getPublicId());
+                                                    return true;
+                                                }
+                                            })
+                                            .toList();
+                                    quakes.addAll(earthquakeFileItems);
+                                } catch (IOException | XPathExpressionException | ParserConfigurationException | SAXException ex) {
+                                    System.getLogger(QuakeParser.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                                } finally {
+                                    semaphore.release();
+                                }
+                                return null;
+                            });
+                        });
+            } catch (IOException ex) {
+                System.getLogger(QuakeParser.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
+        }
+
         return quakes;
     }
 

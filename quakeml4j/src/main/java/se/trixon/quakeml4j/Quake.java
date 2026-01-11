@@ -82,7 +82,7 @@ public class Quake {
     }
 
     public void setPlace(String place) {
-        this.mPlace = place;
+        mPlace = place;
     }
 
     public void setPublicId(String publicId) {
