@@ -129,7 +129,8 @@ public class Origin {
                     return c;
                 }
             }
-            throw new IllegalArgumentException(v);
+            return null;
+            //throw new IllegalArgumentException(v);
         }
 
         private Type(String v) {

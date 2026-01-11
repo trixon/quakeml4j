@@ -159,7 +159,8 @@ public class Quake {
                     return c;
                 }
             }
-            throw new IllegalArgumentException(v);
+            return null;
+            //throw new IllegalArgumentException(v);
         }
     }
 
@@ -183,7 +184,8 @@ public class Quake {
                     return c;
                 }
             }
-            throw new IllegalArgumentException(v);
+            return null;
+            //throw new IllegalArgumentException(v);
         }
 
     }
