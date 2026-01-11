@@ -50,6 +50,9 @@ public class QuakeParser {
     private XPathExpression mCreationInfoAuthorExpression;
     private XPathExpression mCreationInfoCreationTimeExpression;
     private XPathExpression mCreationInfoExpression;
+    private XPathExpression mDescriptionExpression;
+    private XPathExpression mDescriptionTextExpression;
+    private XPathExpression mDescriptionTypeExpression;
     private DocumentBuilderFactory mDocumentBuilderFactory;
     private XPathExpression mEventListExpression;
     private XPathExpression mMagnitudeExpression;
@@ -78,6 +81,10 @@ public class QuakeParser {
             mRootPublicIdExpression = mxPath.compile("@publicID");
             mRootTypeExpression = mxPath.compile("bed:type");
             mRootTypeCertaintyExpression = mxPath.compile("bed:typeCertainty");
+            //
+            mDescriptionExpression = mxPath.compile("bed:description");
+            mDescriptionTextExpression = mxPath.compile("bed:text");
+            mDescriptionTypeExpression = mxPath.compile("bed:type");
             //
             mMagnitudeExpression = mxPath.compile("bed:magnitude");
             mMagnitudeValueExpression = mxPath.compile("bed:mag/bed:value");
@@ -112,6 +119,15 @@ public class QuakeParser {
             q.setType(Quake.Type.fromValue(mRootTypeExpression.evaluate(eventNode)));
             q.setTypeCertainty(Quake.TypeCertainty.fromValue(mRootTypeCertaintyExpression.evaluate(eventNode)));
 //
+            var descriptionNode = (Node) mDescriptionExpression.evaluate(eventNode, XPathConstants.NODE);
+            if (descriptionNode != null) {
+                var text = mDescriptionTextExpression.evaluate(descriptionNode);
+                var type = mDescriptionTypeExpression.evaluate(descriptionNode);
+                if ("earthquake name".equals(type)) {
+                    q.setPlace(text);
+                }
+            }
+
             var magnitudeNode = (Node) mMagnitudeExpression.evaluate(eventNode, XPathConstants.NODE);
             if (magnitudeNode != null) {
                 q.getMagnitude().setValue((Double) mMagnitudeValueExpression.evaluate(magnitudeNode, XPathConstants.NUMBER));
