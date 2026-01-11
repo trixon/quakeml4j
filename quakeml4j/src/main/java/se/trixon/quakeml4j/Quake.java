@@ -25,6 +25,7 @@ public class Quake {
     private Double mMagnitude;
     private String mMagnitudeType;
     private Origin mOrigin = new Origin();
+    private String mPlace;
     private String mPublicId;
     private Type mType;
     private TypeCertainty mTypeCertainty;
@@ -46,6 +47,10 @@ public class Quake {
 
     public Origin getOrigin() {
         return mOrigin;
+    }
+
+    public String getPlace() {
+        return mPlace;
     }
 
     public String getPublicId() {
@@ -74,6 +79,10 @@ public class Quake {
 
     public void setOrigin(Origin origin) {
         mOrigin = origin;
+    }
+
+    public void setPlace(String place) {
+        this.mPlace = place;
     }
 
     public void setPublicId(String publicId) {
